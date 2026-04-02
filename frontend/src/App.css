@@ -1,34 +1,195 @@
-.App-logo {
-    height: 40vmin;
-    pointer-events: none;
+/* Altınay Alyans - App Styles */
+
+.App {
+  min-height: 100vh;
+  background-color: #FDFBF7;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-    .App-logo {
-        animation: App-logo-spin infinite 20s linear;
-    }
+/* Navigation */
+.nav-link {
+  color: #5C584E;
+  transition: color 0.2s ease;
 }
 
-.App-header {
-    background-color: #0f0f10;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: calc(10px + 2vmin);
-    color: white;
+.nav-link:hover {
+  color: #D4AF37;
 }
 
-.App-link {
-    color: #61dafb;
+/* Flipbook Page Flip Animation Enhancement */
+.stf__parent {
+  perspective: 2000px !important;
 }
 
-@keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+.stf__wrapper {
+  transform-style: preserve-3d;
+}
+
+/* Cover page special styling */
+.cover-page {
+  background: linear-gradient(135deg, #FAF8F2 0%, #F2EBE1 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.cover-page::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.03;
+  pointer-events: none;
+}
+
+/* Product image container */
+.product-image-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #FDFBF7 0%, #FAF8F2 100%);
+}
+
+.product-image {
+  max-width: 90%;
+  max-height: 90%;
+  object-fit: contain;
+  filter: drop-shadow(0 10px 20px rgba(0,0,0,0.1));
+}
+
+/* Loading skeleton */
+.skeleton {
+  background: linear-gradient(90deg, #F2EBE1 25%, #FAF8F2 50%, #F2EBE1 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Fade in animation */
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Sound toggle button */
+.sound-toggle {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #FDFBF7;
+  border: 1px solid #E8E1D3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 100;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.sound-toggle:hover {
+  border-color: #D4AF37;
+  box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);
+}
+
+/* Page navigation buttons */
+.page-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(253, 251, 247, 0.95);
+  border: 1px solid #E8E1D3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 50;
+}
+
+.page-nav-btn:hover {
+  background: #D4AF37;
+  border-color: #D4AF37;
+  color: #FDFBF7;
+}
+
+.page-nav-btn.prev {
+  left: 20px;
+}
+
+.page-nav-btn.next {
+  right: 20px;
+}
+
+/* Catalog tabs */
+.catalog-tab {
+  padding: 10px 24px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #5C584E;
+  font-family: 'Playfair Display', serif;
+  font-size: 14px;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.catalog-tab:hover {
+  color: #D4AF37;
+}
+
+.catalog-tab.active {
+  background: #D4AF37;
+  color: #FDFBF7;
+  border-color: #D4AF37;
+}
+
+/* Empty state */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #8A8476;
+  text-align: center;
+  padding: 40px;
+}
+
+/* Admin responsive */
+@media (max-width: 768px) {
+  .admin-table {
+    font-size: 14px;
+  }
+  
+  .admin-table th,
+  .admin-table td {
+    padding: 8px 12px;
+  }
 }
