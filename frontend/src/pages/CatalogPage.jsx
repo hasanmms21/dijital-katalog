@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
 import HTMLFlipBook from "react-pageflip";
-import { Volume2, VolumeX, ChevronLeft, ChevronRight, Settings } from "lucide-react";
+import { Volume2, VolumeX, ChevronLeft, ChevronRight, Settings, Search, X } from "lucide-react";
 import axios from "axios";
+import { Input } from "@/components/ui/input";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -234,8 +235,12 @@ export default function CatalogPage() {
   const [loading, setLoading] = useState(true);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [currentPage, setCurrentPage] = useState(0);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [showSearch, setShowSearch] = useState(false);
   const bookRef = useRef(null);
   const audioRef = useRef(null);
+  const searchInputRef = useRef(null);
 
   // Initialize audio
   useEffect(() => {
@@ -262,6 +267,38 @@ export default function CatalogPage() {
     };
     fetchData();
   }, [activeCatalog]);
+
+  // Search functionality
+  useEffect(() => {
+    if (searchQuery.trim().length >= 2) {
+      const query = searchQuery.toUpperCase();
+      const results = products.filter(p => 
+        p.modelCode.toUpperCase().includes(query)
+      );
+      setSearchResults(results);
+    } else {
+      setSearchResults([]);
+    }
+  }, [searchQuery, products]);
+
+  // Focus search input when opened
+  useEffect(() => {
+    if (showSearch && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [showSearch]);
+
+  // Go to specific product page
+  const goToProduct = (productIndex) => {
+    if (bookRef.current) {
+      // Page 0 is cover, so product pages start at 1
+      const targetPage = productIndex + 1;
+      bookRef.current.pageFlip().flip(targetPage);
+      setSearchQuery("");
+      setSearchResults([]);
+      setShowSearch(false);
+    }
+  };
 
   // Handle page flip
   const onFlip = useCallback((e) => {
@@ -301,14 +338,92 @@ export default function CatalogPage() {
               Dijital Katalog
             </p>
           </div>
-          <Link 
-            to="/admin" 
-            className="flex items-center gap-2 text-text-secondary hover:text-gold transition-colors"
-            data-testid="admin-link"
-          >
-            <Settings size={18} />
-            <span className="font-inter text-sm">Yönetim</span>
-          </Link>
+          
+          {/* Search & Admin */}
+          <div className="flex items-center gap-3">
+            {/* Search */}
+            <div className="relative">
+              {showSearch ? (
+                <div className="flex items-center gap-2 animate-in fade-in slide-in-from-right-2 duration-200">
+                  <div className="relative">
+                    <Input
+                      ref={searchInputRef}
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Model kodu ara..."
+                      className="w-48 sm:w-64 h-9 pl-9 pr-3 bg-white border-ivory-300 focus:border-gold focus:ring-gold/20 font-inter text-sm"
+                      data-testid="search-input"
+                    />
+                    <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
+                  </div>
+                  <button
+                    onClick={() => {
+                      setShowSearch(false);
+                      setSearchQuery("");
+                      setSearchResults([]);
+                    }}
+                    className="p-2 hover:bg-ivory-200 rounded-full transition-colors"
+                    data-testid="close-search-btn"
+                  >
+                    <X size={18} className="text-text-secondary" />
+                  </button>
+                  
+                  {/* Search Results Dropdown */}
+                  {searchResults.length > 0 && (
+                    <div className="absolute top-full left-0 mt-2 w-full bg-white border border-ivory-300 rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto">
+                      {searchResults.map((product, idx) => {
+                        const productIndex = products.findIndex(p => p.id === product.id);
+                        return (
+                          <button
+                            key={product.id}
+                            onClick={() => goToProduct(productIndex)}
+                            className="w-full px-4 py-3 text-left hover:bg-ivory-100 border-b border-ivory-200 last:border-0 transition-colors"
+                            data-testid={`search-result-${product.modelCode}`}
+                          >
+                            <p className="font-playfair text-base text-text-primary">
+                              {product.modelCode}
+                            </p>
+                            <p className="text-xs text-text-muted font-inter mt-0.5">
+                              {product.karatOptions?.join(" · ")} · {product.colors?.length || 0} renk
+                            </p>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                  
+                  {/* No Results */}
+                  {searchQuery.length >= 2 && searchResults.length === 0 && (
+                    <div className="absolute top-full left-0 mt-2 w-full bg-white border border-ivory-300 rounded-lg shadow-lg z-50 p-4 text-center">
+                      <p className="text-sm text-text-muted font-inter">
+                        "{searchQuery}" bulunamadı
+                      </p>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <button
+                  onClick={() => setShowSearch(true)}
+                  className="flex items-center gap-2 px-3 py-2 text-text-secondary hover:text-gold hover:bg-ivory-200 rounded-lg transition-all"
+                  data-testid="open-search-btn"
+                >
+                  <Search size={18} />
+                  <span className="font-inter text-sm hidden sm:inline">Ara</span>
+                </button>
+              )}
+            </div>
+            
+            {/* Admin Link */}
+            <Link 
+              to="/admin" 
+              className="flex items-center gap-2 px-3 py-2 text-text-secondary hover:text-gold hover:bg-ivory-200 rounded-lg transition-all"
+              data-testid="admin-link"
+            >
+              <Settings size={18} />
+              <span className="font-inter text-sm hidden sm:inline">Yönetim</span>
+            </Link>
+          </div>
         </div>
       </header>
 
