@@ -1,0 +1,118 @@
+{
+  "theme": "Light",
+  "archetype": "5 (Jewel & Luxury) - Ivory & Gold Variant",
+  "colors": {
+    "background": {
+      "primary": "#FDFBF7",
+      "secondary": "#FAF8F2",
+      "tertiary": "#F2EBE1",
+      "inverse": "#2A2824"
+    },
+    "text": {
+      "primary": "#2A2824",
+      "secondary": "#5C584E",
+      "muted": "#8A8476",
+      "inverse": "#FDFBF7"
+    },
+    "accent": {
+      "gold_light": "#E5C158",
+      "gold_primary": "#D4AF37",
+      "gold_dark": "#9E7F1C",
+      "rose_gold": "#B76E79",
+      "white_gold": "#E0E5E9"
+    },
+    "border": {
+      "light": "#E8E1D3",
+      "gold": "rgba(212, 175, 55, 0.3)"
+    }
+  },
+  "typography": {
+    "headings_font": "Playfair Display",
+    "body_font": "Inter",
+    "scale": {
+      "h1": "text-4xl sm:text-5xl lg:text-6xl tracking-tight leading-none font-playfair",
+      "h2": "text-2xl sm:text-3xl lg:text-4xl tracking-tight font-playfair",
+      "h3": "text-xl sm:text-2xl font-playfair",
+      "body": "text-base leading-relaxed font-inter text-[#5C584E]",
+      "small_label": "text-xs tracking-[0.2em] uppercase font-inter text-[#8A8476]"
+    }
+  },
+  "spacing_and_layout": {
+    "philosophy": "Generous spacing, editorial layout. High use of negative space to emphasize luxury and focus on the jewelry.",
+    "flipbook": {
+      "aspect_ratio": "portrait per page",
+      "padding": "p-8 sm:p-12 lg:p-16",
+      "spine_shadow_left_page": "shadow-[inset_-20px_0_40px_rgba(0,0,0,0.05)]",
+      "spine_shadow_right_page": "shadow-[inset_20px_0_40px_rgba(0,0,0,0.05)]"
+    }
+  },
+  "components": {
+    "flipbook": {
+      "library": "react-pageflip",
+      "structure": "Use HTMLFlipBook component. Render a Cover Page, then map products to pages. A product can take up a full spread (Left Page: High-res Image, Right Page: Product Details) or a single page depending on density.",
+      "book_spine": "Add a visual spine in the center when open, using CSS gradients (e.g., linear-gradient from transparent to rgba(0,0,0,0.1) back to transparent) to simulate the crease."
+    },
+    "product_details": {
+      "layout": "Editorial layout. Model Code as a small overline label. Large Playfair heading for Karat/Name. Clean grid for selectors.",
+      "selectors": {
+        "color": "Circular color swatches with active ring indicator (Yellow Gold, White Gold, Rose Gold).",
+        "karat": "Minimalist toggle buttons with 1px gold border.",
+        "width": "Clean horizontal slider (2-10mm) or segmented controls. Gram weight should update dynamically based on width/karat."
+      }
+    },
+    "admin_panel": {
+      "layout": "Dense, functional, clean table layout using Shadcn UI. Cardless UI where possible. High-contrast data rows.",
+      "forms": "Use Shadcn Input, Select, and a drag-and-drop zone for GridFS image uploads."
+    }
+  },
+  "media": {
+    "images": [
+      {
+        "url": "https://static.prod-images.emergentagent.com/jobs/8f922a97-2dcb-4321-8dab-48b30c07b7de/images/d2d2d3b8d7b57477606e574646b8bb28d0e697b5ee7c4db58919f0e81a407065.png",
+        "description": "Luxurious ivory and gold abstract cover",
+        "category": "catalog_cover_tny"
+      },
+      {
+        "url": "https://static.prod-images.emergentagent.com/jobs/8f922a97-2dcb-4321-8dab-48b30c07b7de/images/e692e116605292aac38d054b2e77868afad8f12cfbb8a0bf19147edb4f76711a.png",
+        "description": "Deep warm ivory textured background with gold edge",
+        "category": "catalog_cover_as"
+      },
+      {
+        "url": "https://static.prod-images.emergentagent.com/jobs/8f922a97-2dcb-4321-8dab-48b30c07b7de/images/6907b0937868d271e1aa98306c83a90d7b77395dd6db70cec18e8a1e4d0736e0.png",
+        "description": "Creamy off-white textured paper cover",
+        "category": "catalog_cover_ult"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1770457732642-505ffd11c062?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzMzV8MHwxfHNlYXJjaHwxfHxpdm9yeSUyMHRleHR1cmUlMjBiYWNrZ3JvdW5kJTIwbHV4dXJ5fGVufDB8fHx8MTc3NTEzNjQ2N3ww&ixlib=rb-4.1.0&q=85",
+        "description": "Soft ivory fabric texture",
+        "category": "page_background_texture"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1662199295236-a7d1a0129867?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Njl8MHwxfHNlYXJjaHwzfHxsdXh1cnklMjBnb2xkJTIwd2VkZGluZyUyMGJhbmRzJTIwcmluZ3N8ZW58MHx8fHwxNzc1MTM2NDY2fDA&ixlib=rb-4.1.0&q=85",
+        "description": "Set of gold wedding rings",
+        "category": "product_placeholder"
+      }
+    ],
+    "audio": {
+      "flip_sound": "Use HTML5 Audio API. A standard page turn sound should play on the `onFlip` event if sound is toggled on."
+    }
+  },
+  "motion": {
+    "page_flip": "3D page turn via react-pageflip. Pages should have a hard cover for the front/back, and soft pages for the inside.",
+    "hover_states": "Buttons and links should have a subtle text color shift to gold (#D4AF37). No aggressive scaling.",
+    "selectors": "Smooth transitions for active state borders and background colors."
+  },
+  "instructions_to_main_agent": [
+    "Install `react-pageflip` (npm i react-pageflip) for the core catalog experience.",
+    "Install `lucide-react` for icons (volume toggle, arrows, etc.).",
+    "Configure Tailwind with custom fonts: `font-playfair` (Playfair Display) and `font-inter` (Inter). Add the colors from this JSON to tailwind.config.js.",
+    "IMPLEMENT FLIPBOOK CATALOG: NO standard card UI for products in the catalog view. The main interface MUST be a 3D book. Use a 2-page spread for desktop (Image on Left, Details on Right) and 1-page for mobile.",
+    "Ensure the flipbook pages have a realistic book spine effect (shadows in the center) and a textured background using the 'page_background_texture' image.",
+    "Implement a sound toggle button (Volume Icon) floating outside the book that plays a page flip sound on the `onFlip` callback of react-pageflip.",
+    "Build the 3 Catalogs (TNY, AS, ULT) logic: Auto-assign products based on their Model Code prefix (e.g., TNY-102 belongs to TNY catalog). Allow users to switch between these catalogs, showing the respective cover image.",
+    "Product details on the page MUST include: Model Code (overline), dynamic Gram calculation based on Karat and Width (2-10mm slider), and Color switch (Yellow/White/Rose).",
+    "Build the Admin Dashboard: Separate route (e.g., /admin). Build a simple product management table. Include forms for Add/Edit product.",
+    "IMPORTANT: Implement MongoDB GridFS for image storage as requested. The admin panel must allow uploading images that save to GridFS.",
+    "All interactive elements MUST include `data-testid` attributes (e.g., `data-testid=\"next-page-button\"`, `data-testid=\"karat-selector-14k\"`)."
+  ]
+}
