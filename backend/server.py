@@ -58,7 +58,11 @@ class ProductBase(BaseModel):
     colors: List[ColorOption] = []
 
 class ProductCreate(ProductBase):
-    pass
+    @classmethod
+    def validate_model_code(cls, v):
+        if not v or not v.strip():
+            raise ValueError("Model code is required")
+        return v.strip().upper()
 
 class ProductUpdate(BaseModel):
     modelCode: Optional[str] = None
@@ -156,6 +160,12 @@ async def get_image(file_id: str):
 @api_router.post("/products", response_model=Product)
 async def create_product(product: ProductCreate):
     """Create a new product"""
+    # Validate model code
+    if not product.modelCode or not product.modelCode.strip():
+        raise HTTPException(status_code=422, detail="Model code is required")
+    
+    product.modelCode = product.modelCode.strip().upper()
+    
     # Auto-assign catalog if not provided
     catalog = product.catalog or determine_catalog(product.modelCode)
     
