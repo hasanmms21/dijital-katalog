@@ -1,4 +1,3 @@
-GitHub'da backend/requirements.txt dosyasının tüm içeriğini sil ve şununla değiştir:
 
 fastapi==0.110.1
 uvicorn==0.25.0
