@@ -45,37 +45,51 @@ const ProductForm = ({ product, onSave, onCancel }) => {
   const [uploading, setUploading] = useState(false);
   const [selectedColorIndex, setSelectedColorIndex] = useState(0);
 
-  // Handle file upload
+  // Handle file upload to Cloudinary
   const handleFileUpload = async (e) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
     setUploading(true);
-    const uploadedIds = [];
+    const uploadedUrls = [];
 
     try {
       for (const file of files) {
+        // Get signature from backend
+        const sigResponse = await axios.get(`${API}/cloudinary/signature?folder=products`);
+        const sig = sigResponse.data;
+
+        // Upload directly to Cloudinary
         const formDataUpload = new FormData();
         formDataUpload.append("file", file);
+        formDataUpload.append("api_key", sig.api_key);
+        formDataUpload.append("timestamp", sig.timestamp);
+        formDataUpload.append("signature", sig.signature);
+        formDataUpload.append("folder", sig.folder);
 
-        const response = await axios.post(`${API}/upload`, formDataUpload, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
+        const cloudinaryResponse = await fetch(
+          `https://api.cloudinary.com/v1_1/${sig.cloud_name}/image/upload`,
+          { method: "POST", body: formDataUpload }
+        );
 
-        uploadedIds.push(response.data.id);
+        const result = await cloudinaryResponse.json();
+        
+        if (result.secure_url) {
+          uploadedUrls.push(result.secure_url);
+        }
       }
 
       // Add images to selected color
-      if (formData.colors.length > 0) {
+      if (formData.colors.length > 0 && uploadedUrls.length > 0) {
         const updatedColors = [...formData.colors];
         updatedColors[selectedColorIndex].images = [
           ...updatedColors[selectedColorIndex].images,
-          ...uploadedIds,
+          ...uploadedUrls,
         ];
         setFormData({ ...formData, colors: updatedColors });
       }
 
-      toast.success(`${uploadedIds.length} görsel yüklendi`);
+      toast.success(`${uploadedUrls.length} görsel yüklendi`);
     } catch (error) {
       console.error("Upload error:", error);
       toast.error("Görsel yüklenemedi");
@@ -236,10 +250,10 @@ const ProductForm = ({ product, onSave, onCancel }) => {
           
           {/* Current Images */}
           <div className="mt-2 flex flex-wrap gap-2">
-            {formData.colors[selectedColorIndex]?.images.map((imgId, idx) => (
+            {formData.colors[selectedColorIndex]?.images.map((imgUrl, idx) => (
               <div key={idx} className="relative group">
                 <img
-                  src={`${API}/images/${imgId}`}
+                  src={imgUrl.startsWith('http') ? imgUrl : `${API}/images/${imgUrl}`}
                   alt={`Product ${idx}`}
                   className="w-20 h-20 object-cover rounded border border-ivory-300"
                 />

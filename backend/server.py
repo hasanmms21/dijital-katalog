@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException, UploadFile, File, Response
+from fastapi import FastAPI, APIRouter, HTTPException, UploadFile, File, Response, Query
 from fastapi.responses import StreamingResponse
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
@@ -12,6 +12,10 @@ import uuid
 from datetime import datetime, timezone
 from bson import ObjectId
 import io
+import time
+import cloudinary
+import cloudinary.utils
+import cloudinary.uploader
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -21,8 +25,16 @@ mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
-# GridFS bucket for images
+# GridFS bucket for images (kept for backward compatibility)
 fs_bucket = AsyncIOMotorGridFSBucket(db, bucket_name="images")
+
+# Cloudinary configuration
+cloudinary.config(
+    cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
+    api_key=os.getenv("CLOUDINARY_API_KEY"),
+    api_secret=os.getenv("CLOUDINARY_API_SECRET"),
+    secure=True
+)
 
 # Create the main app without a prefix
 app = FastAPI()
@@ -47,7 +59,7 @@ class GramData(BaseModel):
 
 class ColorOption(BaseModel):
     name: str
-    images: List[str] = []  # Store GridFS file IDs
+    images: List[str] = []  # Store Cloudinary URLs or GridFS IDs
 
 class ProductBase(BaseModel):
     modelCode: str
@@ -100,11 +112,59 @@ async def root():
     return {"message": "Altınay Alyans Catalog API"}
 
 
-# ================== IMAGE ROUTES ==================
+# ================== CLOUDINARY ROUTES ==================
+
+@api_router.get("/cloudinary/signature")
+async def get_cloudinary_signature(
+    folder: str = Query(default="products", description="Upload folder")
+):
+    """Generate signed upload params for Cloudinary"""
+    try:
+        timestamp = int(time.time())
+        
+        # Allowed folders
+        allowed_folders = ("products", "catalog", "uploads")
+        if folder not in allowed_folders:
+            folder = "products"
+        
+        params = {
+            "timestamp": timestamp,
+            "folder": f"altinay/{folder}",
+        }
+        
+        signature = cloudinary.utils.api_sign_request(
+            params,
+            os.getenv("CLOUDINARY_API_SECRET")
+        )
+        
+        return {
+            "signature": signature,
+            "timestamp": timestamp,
+            "cloud_name": os.getenv("CLOUDINARY_CLOUD_NAME"),
+            "api_key": os.getenv("CLOUDINARY_API_KEY"),
+            "folder": f"altinay/{folder}"
+        }
+    except Exception as e:
+        logger.error(f"Cloudinary signature error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.delete("/cloudinary/{public_id:path}")
+async def delete_cloudinary_image(public_id: str):
+    """Delete image from Cloudinary"""
+    try:
+        result = cloudinary.uploader.destroy(public_id, invalidate=True)
+        return {"result": result}
+    except Exception as e:
+        logger.error(f"Cloudinary delete error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ================== LEGACY GRIDFS IMAGE ROUTES (for backward compatibility) ==================
 
 @api_router.post("/upload")
 async def upload_image(file: UploadFile = File(...)):
-    """Upload image to GridFS and return file ID"""
+    """Upload image to GridFS and return file ID (Legacy - use Cloudinary instead)"""
     try:
         contents = await file.read()
         

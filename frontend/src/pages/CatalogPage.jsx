@@ -78,11 +78,17 @@ const ProductPage = ({ product, isLeft }) => {
     return (baseGram * karatMultiplier * widthMultiplier).toFixed(2);
   };
 
-  // Get current image
+  // Get current image - supports both Cloudinary URLs and legacy GridFS IDs
   const getCurrentImage = () => {
     const color = product.colors?.[selectedColor];
     if (color && color.images && color.images.length > 0) {
-      return `${API}/images/${color.images[0]}`;
+      const imageUrl = color.images[0];
+      // Check if it's a Cloudinary URL (starts with http) or GridFS ID
+      if (imageUrl.startsWith('http')) {
+        return imageUrl;
+      }
+      // Legacy GridFS support
+      return `${API}/images/${imageUrl}`;
     }
     return "https://images.unsplash.com/photo-1662199295236-a7d1a0129867?w=600";
   };
