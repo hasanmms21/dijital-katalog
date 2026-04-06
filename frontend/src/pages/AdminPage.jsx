@@ -29,23 +29,84 @@ const COLOR_OPTIONS = [
   { name: "Rose Gold", value: "rose-gold" },
 ];
 
+// Karat options
+const KARAT_OPTIONS = ["14K", "18K", "22K"];
+
 // Default values
-const DEFAULT_KARAT_OPTIONS = ["14K", "18K", "22K"];
 const DEFAULT_WIDTH_OPTIONS = [2, 3, 4, 5, 6, 7, 8, 9, 10];
 
 // Product Form Component
 const ProductForm = ({ product, onSave, onCancel }) => {
   const [formData, setFormData] = useState({
     modelCode: product?.modelCode || "",
-    karatOptions: product?.karatOptions || [...DEFAULT_KARAT_OPTIONS],
+    karatOptions: product?.karatOptions || [],
     widthOptions: product?.widthOptions || [...DEFAULT_WIDTH_OPTIONS],
     gramData: product?.gramData || [],
     colors: product?.colors || [],
+    karatImages: product?.karatImages || {},
   });
   const [uploading, setUploading] = useState(false);
   const [selectedColorIndex, setSelectedColorIndex] = useState(0);
+  const [selectedKaratForImage, setSelectedKaratForImage] = useState("");
 
-  // Handle file upload to Cloudinary
+  // Handle file upload to Cloudinary for Karat-based images
+  const handleKaratImageUpload = async (e) => {
+    const files = e.target.files;
+    if (!files || files.length === 0 || !selectedKaratForImage) {
+      toast.error("Önce bir ayar seçin");
+      return;
+    }
+
+    setUploading(true);
+    const uploadedUrls = [];
+
+    try {
+      for (const file of files) {
+        const sigResponse = await axios.get(`${API}/cloudinary/signature?folder=products`);
+        const sig = sigResponse.data;
+
+        const formDataUpload = new FormData();
+        formDataUpload.append("file", file);
+        formDataUpload.append("api_key", sig.api_key);
+        formDataUpload.append("timestamp", sig.timestamp);
+        formDataUpload.append("signature", sig.signature);
+        formDataUpload.append("folder", sig.folder);
+
+        const cloudinaryResponse = await fetch(
+          `https://api.cloudinary.com/v1_1/${sig.cloud_name}/image/upload`,
+          { method: "POST", body: formDataUpload }
+        );
+
+        const result = await cloudinaryResponse.json();
+        
+        if (result.secure_url) {
+          uploadedUrls.push(result.secure_url);
+        }
+      }
+
+      // Add images to selected karat
+      if (uploadedUrls.length > 0) {
+        const updatedKaratImages = { ...formData.karatImages };
+        if (!updatedKaratImages[selectedKaratForImage]) {
+          updatedKaratImages[selectedKaratForImage] = [];
+        }
+        updatedKaratImages[selectedKaratForImage] = [
+          ...updatedKaratImages[selectedKaratForImage],
+          ...uploadedUrls,
+        ];
+        setFormData({ ...formData, karatImages: updatedKaratImages });
+      }
+
+      toast.success(`${uploadedUrls.length} görsel yüklendi (${selectedKaratForImage})`);
+    } catch (error) {
+      console.error("Upload error:", error);
+      toast.error("Görsel yüklenemedi");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // Handle file upload to Cloudinary for Color-based images (legacy)
   const handleFileUpload = async (e) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
@@ -129,6 +190,31 @@ const ProductForm = ({ product, onSave, onCancel }) => {
     setFormData({ ...formData, colors: updatedColors });
   };
 
+  // Remove image from karat
+  const removeKaratImage = (karat, imageIndex) => {
+    const updatedKaratImages = { ...formData.karatImages };
+    updatedKaratImages[karat] = updatedKaratImages[karat].filter(
+      (_, i) => i !== imageIndex
+    );
+    setFormData({ ...formData, karatImages: updatedKaratImages });
+  };
+
+  // Toggle karat selection
+  const toggleKarat = (karat) => {
+    const currentKarats = formData.karatOptions || [];
+    if (currentKarats.includes(karat)) {
+      setFormData({
+        ...formData,
+        karatOptions: currentKarats.filter(k => k !== karat)
+      });
+    } else {
+      setFormData({
+        ...formData,
+        karatOptions: [...currentKarats, karat].sort()
+      });
+    }
+  };
+
   // Add gram data
   const addGramData = () => {
     setFormData({
@@ -183,9 +269,102 @@ const ProductForm = ({ product, onSave, onCancel }) => {
           className="mt-1"
         />
         <p className="text-xs text-text-muted mt-1 font-inter">
-          Katalog, kod önekine göre otomatik belirlenir (TNY, AS, ULT)
+          Katalog, kod önekine göre otomatik belirlenir (TNY, AS, ULT, ALY)
         </p>
       </div>
+
+      {/* Karat Selection */}
+      <div>
+        <Label className="text-text-primary font-inter">Ayar Seçimi *</Label>
+        <p className="text-xs text-text-muted mb-2 font-inter">
+          Bu ürün için geçerli ayarları seçin
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {KARAT_OPTIONS.map((karat) => (
+            <button
+              key={karat}
+              type="button"
+              onClick={() => toggleKarat(karat)}
+              className={`px-4 py-2 rounded border text-sm font-inter transition-all ${
+                formData.karatOptions?.includes(karat)
+                  ? "border-gold bg-gold text-white"
+                  : "border-ivory-300 bg-white text-text-secondary hover:border-gold"
+              }`}
+              data-testid={`karat-toggle-${karat.toLowerCase()}`}
+            >
+              {karat}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Karat-based Image Upload */}
+      {formData.karatOptions?.length > 0 && (
+        <div>
+          <Label className="text-text-primary font-inter">Ayar Görselleri</Label>
+          <p className="text-xs text-text-muted mb-2 font-inter">
+            Her ayar için ayrı görsel yükleyebilirsiniz
+          </p>
+          
+          {/* Karat selector for images */}
+          <div className="flex flex-wrap gap-2 mb-3">
+            {formData.karatOptions.map((karat) => (
+              <button
+                key={karat}
+                type="button"
+                onClick={() => setSelectedKaratForImage(karat)}
+                className={`px-3 py-1 rounded border text-sm font-inter ${
+                  selectedKaratForImage === karat
+                    ? "border-gold bg-gold/10 text-gold"
+                    : "border-ivory-300 text-text-secondary"
+                }`}
+              >
+                {karat} ({formData.karatImages?.[karat]?.length || 0} görsel)
+              </button>
+            ))}
+          </div>
+
+          {/* Show images for selected karat */}
+          {selectedKaratForImage && (
+            <>
+              <div className="flex flex-wrap gap-2 mb-3">
+                {formData.karatImages?.[selectedKaratForImage]?.map((imgUrl, idx) => (
+                  <div key={idx} className="relative group">
+                    <img
+                      src={imgUrl}
+                      alt={`${selectedKaratForImage} ${idx}`}
+                      className="w-20 h-20 object-cover rounded border border-ivory-300"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeKaratImage(selectedKaratForImage, idx)}
+                      className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X size={12} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              {/* Upload zone for karat images */}
+              <label className={`upload-zone block ${uploading ? "opacity-50" : ""}`}>
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleKaratImageUpload}
+                  disabled={uploading}
+                  className="hidden"
+                />
+                <Upload className="mx-auto text-gold mb-2" size={24} />
+                <p className="text-sm text-text-secondary font-inter">
+                  {uploading ? "Yükleniyor..." : `${selectedKaratForImage} için görsel yükle`}
+                </p>
+              </label>
+            </>
+          )}
+        </div>
+      )}
 
       {/* Colors Section */}
       <div>

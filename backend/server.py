@@ -102,6 +102,8 @@ def determine_catalog(model_code: str) -> str:
         return "AS"
     elif upper_code.startswith("ULT"):
         return "ULT"
+    elif upper_code.startswith("ALY"):
+        return "ALY"
     return "TNY"  # Default to TNY
 
 
@@ -331,7 +333,7 @@ async def delete_product(product_id: str):
 @api_router.get("/catalogs")
 async def get_catalogs():
     """Get catalog info with product counts"""
-    catalogs = ["TNY", "AS", "ULT"]
+    catalogs = ["TNY", "AS", "ULT", "ALY"]
     result = []
     
     for cat in catalogs:
