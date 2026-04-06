@@ -250,7 +250,8 @@ export default function CatalogPage() {
   // Initialize audio
   useEffect(() => {
     audioRef.current = new Audio(PAGE_FLIP_SOUND);
-    audioRef.current.volume = 0.3;
+    audioRef.current.volume = 0.5;
+    audioRef.current.load();
   }, []);
 
   // Fetch products and catalogs
