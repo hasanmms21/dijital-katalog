@@ -14,8 +14,8 @@ const CATALOG_COVERS = {
   ULT: "https://static.prod-images.emergentagent.com/jobs/8f922a97-2dcb-4321-8dab-48b30c07b7de/images/6907b0937868d271e1aa98306c83a90d7b77395dd6db70cec18e8a1e4d0736e0.png",
 };
 
-// Page flip sound (base64 encoded short sound)
-const PAGE_FLIP_SOUND = "data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAABhgC7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7//////////////////////////////////////////////////////////////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAAAAAAAAAAAAYYV+f9RAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAABhgC7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7//////////////////////////////////////////////////////////////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAAAAAAAAAAAAYYV+f9RAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+// Page flip sound URL (real page turn sound)
+const PAGE_FLIP_SOUND_URL = "/page-flip.mp3";
 
 // Single Page Component
 const Page = ({ children, className = "", isLeft = false }) => {
@@ -250,8 +250,10 @@ export default function CatalogPage() {
 
   // Initialize audio
   useEffect(() => {
-    audioRef.current = new Audio(PAGE_FLIP_SOUND);
-    audioRef.current.volume = 0.3;
+    audioRef.current = new Audio(PAGE_FLIP_SOUND_URL);
+    audioRef.current.volume = 0.5;
+    // Preload the audio
+    audioRef.current.load();
   }, []);
 
   // Fetch products and catalogs
@@ -552,11 +554,19 @@ export default function CatalogPage() {
       {/* Sound Toggle */}
       <button
         data-testid="sound-toggle"
-        onClick={() => setSoundEnabled(!soundEnabled)}
+        onClick={() => {
+          const newState = !soundEnabled;
+          setSoundEnabled(newState);
+          // Play a test sound when enabling
+          if (newState && audioRef.current) {
+            audioRef.current.currentTime = 0;
+            audioRef.current.play().catch(() => {});
+          }
+        }}
         className="sound-toggle"
         title={soundEnabled ? "Sesi Kapat" : "Sesi Aç"}
       >
-        {soundEnabled ? <Volume2 size={20} className="text-gold" /> : <VolumeX size={20} className="text-text-muted" />}
+        {soundEnabled ? <Volume2 size={24} className="text-gold" /> : <VolumeX size={24} className="text-text-muted" />}
       </button>
     </div>
   );
