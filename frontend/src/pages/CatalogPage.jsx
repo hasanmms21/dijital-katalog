@@ -203,7 +203,7 @@ const ProductPage = ({ product, isLeft }) => {
               <span>{Math.min(...(product.widthOptions || [2]))}mm</span>
               <span>{Math.max(...(product.widthOptions || [10]))}mm</span>
             </div>
-          </div>*/
+          </div>*/}
 
           {/* Gram Display */}
           <div className="pt-2 border-t border-ivory-300">
