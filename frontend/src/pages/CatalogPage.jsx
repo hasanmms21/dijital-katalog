@@ -12,7 +12,6 @@ const CATALOG_COVERS = {
   TNY: "https://static.prod-images.emergentagent.com/jobs/8f922a97-2dcb-4321-8dab-48b30c07b7de/images/d2d2d3b8d7b57477606e574646b8bb28d0e697b5ee7c4db58919f0e81a407065.png",
   AS: "https://static.prod-images.emergentagent.com/jobs/8f922a97-2dcb-4321-8dab-48b30c07b7de/images/e692e116605292aac38d054b2e77868afad8f12cfbb8a0bf19147edb4f76711a.png",
   ULT: "https://static.prod-images.emergentagent.com/jobs/8f922a97-2dcb-4321-8dab-48b30c07b7de/images/6907b0937868d271e1aa98306c83a90d7b77395dd6db70cec18e8a1e4d0736e0.png",
-  ALY: "https://static.prod-images.emergentagent.com/jobs/8f922a97-2dcb-4321-8dab-48b30c07b7de/images/d2d2d3b8d7b57477606e574646b8bb28d0e697b5ee7c4db58919f0e81a407065.png",
 };
 
 // Page flip sound URL (real page turn sound)
@@ -454,7 +453,7 @@ export default function CatalogPage() {
       {/* Catalog Tabs */}
       <div className="bg-ivory-100 border-b border-ivory-300">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-2 overflow-x-auto">
-          {["TNY", "AS", "ULT", "ALY"].map((cat) => {
+          {["TNY", "AS", "ULT"].map((cat) => {
             const catalogInfo = catalogs.find(c => c.name === cat);
             return (
               <button
