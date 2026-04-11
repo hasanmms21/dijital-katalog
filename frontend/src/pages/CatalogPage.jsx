@@ -56,7 +56,7 @@ const CoverPage = ({ catalog, isBack = false }) => {
 };
 
 // Product Page Component
-const ProductPage = ({ product, isLeft }) => {
+const ProductPage = ({ product, isLeft, onImageClick }) => {
   const [selectedColor, setSelectedColor] = useState(0);
   const [selectedKarat, setSelectedKarat] = useState(product.karatOptions?.[0] || "14K");
   const [selectedWidth, setSelectedWidth] = useState(product.widthOptions?.[0] || 4);
@@ -115,8 +115,11 @@ const ProductPage = ({ product, isLeft }) => {
           </h2>
         </div>
 
-        {/* Product Image */}
-        <div className="flex-1 flex items-center justify-center mb-6 relative min-h-[200px]">
+        {/* Product Image - Clickable */}
+        <div 
+          className="flex-1 flex items-center justify-center mb-6 relative min-h-[200px] cursor-zoom-in"
+          onClick={() => onImageClick && onImageClick(getCurrentImage(), product.modelCode)}
+        >
           {!imageLoaded && (
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="skeleton w-48 h-48 rounded-lg"></div>
@@ -125,7 +128,7 @@ const ProductPage = ({ product, isLeft }) => {
           <img
             src={getCurrentImage()}
             alt={product.modelCode}
-            className={`product-image max-h-[280px] transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+            className={`product-image max-h-[280px] transition-all duration-300 hover:scale-105 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
             onLoad={() => setImageLoaded(true)}
             onError={(e) => {
               e.target.src = "https://images.unsplash.com/photo-1662199295236-a7d1a0129867?w=600";
@@ -234,9 +237,23 @@ export default function CatalogPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [showSearch, setShowSearch] = useState(false);
+  const [lightboxImage, setLightboxImage] = useState(null);
+  const [lightboxTitle, setLightboxTitle] = useState("");
   const bookRef = useRef(null);
   const audioRef = useRef(null);
   const searchInputRef = useRef(null);
+
+  // Open lightbox
+  const openLightbox = (imageUrl, title) => {
+    setLightboxImage(imageUrl);
+    setLightboxTitle(title);
+  };
+
+  // Close lightbox
+  const closeLightbox = () => {
+    setLightboxImage(null);
+    setLightboxTitle("");
+  };
 
   // Initialize audio
   useEffect(() => {
@@ -516,6 +533,7 @@ export default function CatalogPage() {
                     <ProductPage 
                       product={product} 
                       isLeft={idx % 2 === 0}
+                      onImageClick={openLightbox}
                     />
                   </div>
                 ))
@@ -558,6 +576,31 @@ export default function CatalogPage() {
       >
         {soundEnabled ? <Volume2 size={24} className="text-gold" /> : <VolumeX size={24} className="text-text-muted" />}
       </button>
+
+      {/* Image Lightbox Modal */}
+      {lightboxImage && (
+        <div 
+          className="fixed inset-0 bg-black/90 z-[9999] flex items-center justify-center p-4 animate-in fade-in duration-200"
+          onClick={closeLightbox}
+        >
+          <button
+            onClick={closeLightbox}
+            className="absolute top-4 right-4 w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-colors"
+          >
+            <X size={28} className="text-white" />
+          </button>
+          
+          <div className="text-center">
+            <img
+              src={lightboxImage}
+              alt={lightboxTitle}
+              className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            />
+            <p className="mt-4 text-white font-playfair text-2xl">{lightboxTitle}</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
